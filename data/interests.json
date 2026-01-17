@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 1,
+    "Name": "Community Outreach"
+  },
+  {
+    "Id": 2,
+    "Name": "Event Planning"
+  },
+  {
+    "Id": 3,
+    "Name": "Fundraising"
+  },
+  {
+    "Id": 4,
+    "Name": "Marketing & Social Media"
+  },
+  {
+    "Id": 5,
+    "Name": "Teaching & Mentoring"
+  },
+  {
+    "Id": 6,
+    "Name": "Administrative Support"
+  }
+]
