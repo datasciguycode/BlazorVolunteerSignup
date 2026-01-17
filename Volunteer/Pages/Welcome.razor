@@ -1,0 +1,647 @@
+﻿@page "/lmQvC2gla934vbWiZtduNisIaGCxpTS9"
+@using Volunteer.Models
+@using Volunteer.Services
+@using Microsoft.JSInterop
+@inject ISupabaseService SupabaseService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Welcome!</PageTitle>
+
+<style>
+    body {
+        background-color: #f5f5f5;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
+
+    .page-header img {
+        max-width: 300px;
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+    .page-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 400;
+        opacity: 0.95;
+    }
+
+    .page-content {
+        padding: 30px;
+    }
+
+    .page-content p {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .message-bar-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .user-email-box {
+        margin-bottom: 1.5rem;
+        padding: 12px;
+        background-color: #e7f3ff;
+        border-left: 4px solid #0066cc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    .checkbox-list {
+        margin-bottom: 1.5rem;
+    }
+
+    .checkbox-list h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .checkbox-item {
+        margin-bottom: 0.75rem;
+    }
+
+    .form-field {
+        margin-bottom: 1.5rem;
+    }
+
+    .submit-button {
+        margin-top: 1.5rem;
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #3ECF8E 0%, #2db876 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 17px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(62, 207, 142, 0.3);
+        transition: transform 0.2s;
+        width: 50%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .submit-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(62, 207, 142, 0.4);
+    }
+
+    .submit-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .next-button {
+        margin-top: 1rem;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        transition: transform 0.2s;
+    }
+
+    .next-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <img src="/images/logo.png" alt="MCDPTX Logo" />
+        <h3>Welcome to the Party! Please select your interests below:</h3>
+    </div>
+
+    <div class="page-content">
+        @if (string.IsNullOrWhiteSpace(_authToken) && string.IsNullOrEmpty(_statusMessage))
+        {
+            <div class="message-bar-container">
+                <FluentMessageBar Intent="MessageIntent.Warning">
+                    Please use the magic link sent to your email to access this form.
+                </FluentMessageBar>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_statusMessage))
+        {
+            <div class="message-bar-container">
+                <FluentMessageBar Intent="@_messageIntent">
+                    @_statusMessage
+                </FluentMessageBar>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_userEmail))
+        {
+            <div class="user-email-box">
+                <strong>Email:</strong> @_userEmail
+            </div>
+        }
+
+        <FluentTabs @bind-ActiveTabId="@_activeTabId" Style="width: 100%;">
+            <FluentTab Label="Interests" Id="tab-interests">
+                <div class="checkbox-list">
+                    <h3>Options you find interesting from each tab below:</h3>
+                    @if (_isLoading)
+                    {
+                        <div>Loading interests...</div>
+                    }
+                    else if (_checkboxOptions.Count == 0)
+                    {
+                        <div>No interests available.</div>
+                    }
+                    else
+                    {
+                        @foreach (var option in _checkboxOptions)
+                        {
+                            <div class="checkbox-item">
+                                <FluentCheckbox @bind-Value="option.IsSelected" Disabled="@(_isSubmitting || _isSubmitted)">
+                                    @option.Label
+                                </FluentCheckbox>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" @onclick="@(() => _activeTabId = "tab-activities")" class="next-button">
+                    Next &gt;&gt;
+                </button>
+            </FluentTab>
+
+            <FluentTab Label="Activities" Id="tab-activities">
+                <div class="checkbox-list">
+                    <h3>Select your activities:</h3>
+                    @if (_isLoading)
+                    {
+                        <div>Loading activities...</div>
+                    }
+                    else if (_activityOptions.Count == 0)
+                    {
+                        <div>No activities available.</div>
+                    }
+                    else
+                    {
+                        @foreach (var option in _activityOptions)
+                        {
+                            <div class="checkbox-item">
+                                <FluentCheckbox @bind-Value="option.IsSelected" Disabled="@(_isSubmitting || _isSubmitted)">
+                                    @option.Label
+                                </FluentCheckbox>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" @onclick="@(() => _activeTabId = "tab-outreach")" class="next-button">
+                    Next &gt;&gt;
+                </button>
+            </FluentTab>
+
+            <FluentTab Label="Outreach" Id="tab-outreach">
+                <div class="checkbox-list">
+                    <h3>Select your outreach sub-committee interests:</h3>
+                    @if (_isLoading)
+                    {
+                        <div>Loading outreach sub-committee items...</div>
+                    }
+                    else if (_outreachSubCommitteeOptions.Count == 0)
+                    {
+                        <div>No outreach sub-committee items available.</div>
+                    }
+                    else
+                    {
+                        @foreach (var option in _outreachSubCommitteeOptions)
+                        {
+                            <div class="checkbox-item">
+                                <FluentCheckbox @bind-Value="option.IsSelected" Disabled="@(_isSubmitting || _isSubmitted)">
+                                    @option.Label
+                                </FluentCheckbox>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" @onclick="@(() => _activeTabId = "tab-standing")" class="next-button">
+                    Next &gt;&gt;
+                </button>
+            </FluentTab>
+
+            <FluentTab Label="Standing" Id="tab-standing">
+                <div class="checkbox-list">
+                    <h3>Select your standing committee interests:</h3>
+                    @if (_isLoading)
+                    {
+                        <div>Loading standing committee items...</div>
+                    }
+                    else if (_standingCommitteeOptions.Count == 0)
+                    {
+                        <div>No standing committee items available.</div>
+                    }
+                    else
+                    {
+                        @foreach (var option in _standingCommitteeOptions)
+                        {
+                            <div class="checkbox-item">
+                                <FluentCheckbox @bind-Value="option.IsSelected" Disabled="@(_isSubmitting || _isSubmitted)">
+                                    @option.Label
+                                </FluentCheckbox>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" @onclick="@(() => _activeTabId = "tab-aboutme")" class="next-button">
+                    Next &gt;&gt;
+                </button>
+            </FluentTab>
+
+            <FluentTab Label="About Me" Id="tab-aboutme">
+                <div style="margin-bottom: 1rem;">
+                    <h3>Tell us about yourself:</h3>
+                    <div class="form-field">
+                        <FluentTextArea @bind-Value="_aboutMyself" Label="About Myself"
+                            Disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
+                            Rows="6" Style="width: 100%;" Maxlength="100" />
+                    </div>
+                    <div class="form-field">
+                        <FluentTextArea @bind-Value="_emergencyContact" Label="Emergency Contact"
+                            Disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
+                            Rows="4" Style="width: 100%;" Maxlength="100" />
+                    </div>
+                </div>
+                <button type="button" @onclick="@SubmitMessageAsync"
+                    disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
+                    class="submit-button">
+                    @if (_isSubmitting)
+                    {
+                        <span>📧 Sending...</span>
+                    }
+                    else
+                    {
+                        <span>✨ Submit</span>
+                    }
+                </button>
+            </FluentTab>
+        </FluentTabs>
+    </div>
+</div>
+
+@code {
+    private class CheckboxOption
+    {
+        public long Id { get; set; }
+        public string Label { get; set; } = string.Empty;
+        public bool IsSelected { get; set; }
+    }
+
+    private List<CheckboxOption> _checkboxOptions = new();
+    private List<CheckboxOption> _activityOptions = new();
+    private List<CheckboxOption> _outreachSubCommitteeOptions = new();
+    private List<CheckboxOption> _standingCommitteeOptions = new();
+
+    private string _aboutMyself = string.Empty;
+    private string _emergencyContact = string.Empty;
+
+    private string _activeTabId = "tab-interests";
+    private string _authToken = string.Empty;
+    private string _userEmail = string.Empty;
+    private bool _isSubmitting = false;
+    private bool _isSubmitted = false;
+    private bool _isLoading = false;
+    private string _statusMessage = string.Empty;
+    private MessageIntent _messageIntent = MessageIntent.Success;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Extract auth token or error from URL hash FIRST
+                var urlHash = await JSRuntime.InvokeAsync<string>("getLocationHash");
+                if (!string.IsNullOrEmpty(urlHash))
+                {
+                    var hashParams = System.Web.HttpUtility.ParseQueryString(urlHash.TrimStart('#'));
+
+                    // Check for errors first
+                    var error = hashParams["error"];
+                    var errorDescription = hashParams["error_description"];
+
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        _messageIntent = MessageIntent.Error;
+
+                        // Parse error description for user-friendly message
+                        if (!string.IsNullOrEmpty(errorDescription))
+                        {
+                            var decodedError = System.Web.HttpUtility.UrlDecode(errorDescription);
+                            _statusMessage = decodedError;
+                        }
+                        else
+                        {
+                            _statusMessage = "Authentication failed. Please request a new magic link.";
+                        }
+
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        // No error, check for access token
+                        var accessToken = hashParams["access_token"];
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            _authToken = accessToken;
+
+                            // Also extract email if present
+                            var email = hashParams["email"];
+                            if (!string.IsNullOrEmpty(email))
+                            {
+                                _userEmail = System.Web.HttpUtility.UrlDecode(email);
+                            }
+                        }
+                    }
+                }
+
+                // Load interests from Supabase using the auth token (if available)
+                await LoadInterestsFromSupabaseAsync();
+
+                StateHasChanged();
+            }
+            catch { /* Ignore errors */ }
+        }
+    }
+
+    private async Task LoadInterestsFromSupabaseAsync()
+    {
+        try
+        {
+            _isLoading = true;
+
+            // Load interests (interest_type_id = 1)
+            var interests = await SupabaseService.GetInterestsAsync(_authToken);
+
+            if (interests != null && interests.Count > 0)
+            {
+                _checkboxOptions = interests.Select(i => new CheckboxOption
+                {
+                    Id = i.Id,
+                    Label = i.Name,
+                    IsSelected = false
+                }).ToList();
+            }
+            else
+            {
+                _checkboxOptions = new List<CheckboxOption>();
+            }
+
+            // Load activities (interest_type_id = 2)
+            var activities = await SupabaseService.GetActivitiesAsync(_authToken);
+
+            if (activities != null && activities.Count > 0)
+            {
+                _activityOptions = activities.Select(a => new CheckboxOption
+                {
+                    Id = a.Id,
+                    Label = a.Name,
+                    IsSelected = false
+                }).ToList();
+            }
+            else
+            {
+                _activityOptions = new List<CheckboxOption>();
+            }
+
+            // Load outreach sub-committee (interest_type_id = 3)
+            var outreachSubCommittee = await SupabaseService.GetOutreachSubCommitteeAsync(_authToken);
+
+            if (outreachSubCommittee != null && outreachSubCommittee.Count > 0)
+            {
+                _outreachSubCommitteeOptions = outreachSubCommittee.Select(o => new CheckboxOption
+                {
+                    Id = o.Id,
+                    Label = o.Name,
+                    IsSelected = false
+                }).ToList();
+            }
+            else
+            {
+                _outreachSubCommitteeOptions = new List<CheckboxOption>();
+            }
+
+            // Load standing committee (interest_type_id = 4)
+            var standingCommittee = await SupabaseService.GetStandingCommitteeAsync(_authToken);
+
+            if (standingCommittee != null && standingCommittee.Count > 0)
+            {
+                _standingCommitteeOptions = standingCommittee.Select(s => new CheckboxOption
+                {
+                    Id = s.Id,
+                    Label = s.Name,
+                    IsSelected = false
+                }).ToList();
+            }
+            else
+            {
+                _standingCommitteeOptions = new List<CheckboxOption>();
+            }
+        }
+        catch
+        {
+            // Fallback to empty list if loading fails
+            _checkboxOptions = new List<CheckboxOption>();
+            _activityOptions = new List<CheckboxOption>();
+            _outreachSubCommitteeOptions = new List<CheckboxOption>();
+            _standingCommitteeOptions = new List<CheckboxOption>();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task SubmitMessageAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_authToken))
+        {
+            return;
+        }
+
+        _isSubmitting = true;
+        _statusMessage = string.Empty;
+
+        try
+        {
+            // Combine all selected items from all tabs
+            var selectedInterestIds = _checkboxOptions
+            .Where(x => x.IsSelected)
+            .Select(x => x.Id)
+            .Concat(_activityOptions
+            .Where(x => x.IsSelected)
+            .Select(x => x.Id))
+            .Concat(_outreachSubCommitteeOptions
+            .Where(x => x.IsSelected)
+            .Select(x => x.Id))
+            .Concat(_standingCommitteeOptions
+            .Where(x => x.IsSelected)
+            .Select(x => x.Id))
+            .ToList();
+
+            // Extract email from the auth token
+            var userEmail = await GetUserEmailFromToken();
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                _messageIntent = MessageIntent.Error;
+                _statusMessage = "Unable to determine user email. Please try again.";
+                return;
+            }
+
+            // Call update-interests function
+            var (interestsSuccess, interestsError) = await SupabaseService.UpdateVolunteerInterestsAsync(
+                userEmail,
+                selectedInterestIds,
+                _authToken
+            );
+
+            // Call update-volunteer function
+            var (volunteerSuccess, volunteerError) = await SupabaseService.UpdateVolunteerAsync(
+                userEmail,
+                _aboutMyself,
+                _emergencyContact,
+                _authToken
+            );
+
+            if (interestsSuccess && volunteerSuccess)
+            {
+                _messageIntent = MessageIntent.Success;
+                _statusMessage = "Thank you! Your information has been saved successfully.";
+                _isSubmitted = true;
+            }
+            else
+            {
+                _messageIntent = MessageIntent.Error;
+                var errors = new List<string>();
+                if (!interestsSuccess) errors.Add(interestsError);
+                if (!volunteerSuccess) errors.Add(volunteerError);
+                _statusMessage = $"Failed to save your information. {string.Join(" ", errors)}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _messageIntent = MessageIntent.Error;
+            _statusMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private async Task<string> GetUserEmailFromToken()
+    {
+        try
+        {
+            // First, check if we already have the email stored
+            if (!string.IsNullOrEmpty(_userEmail))
+            {
+                return _userEmail;
+            }
+
+            // Get the user's email from the URL hash parameters
+            var urlHash = await JSRuntime.InvokeAsync<string>("getLocationHash");
+            if (!string.IsNullOrEmpty(urlHash))
+            {
+                // Try to extract email from hash if it's there
+                var hashParams = System.Web.HttpUtility.ParseQueryString(urlHash.TrimStart('#'));
+                var email = hashParams["email"];
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    _userEmail = System.Web.HttpUtility.UrlDecode(email);
+                    return _userEmail;
+                }
+            }
+
+            // If not in hash, try to decode the JWT token to get the email
+            if (!string.IsNullOrWhiteSpace(_authToken))
+            {
+                var email = DecodeEmailFromJwt(_authToken);
+                if (!string.IsNullOrEmpty(email))
+                {
+                    _userEmail = email;
+                    return _userEmail;
+                }
+            }
+
+            return string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    private string DecodeEmailFromJwt(string token)
+    {
+        try
+        {
+            // JWT tokens have 3 parts separated by dots: header.payload.signature
+            var parts = token.Split('.');
+            if (parts.Length != 3)
+            {
+                return string.Empty;
+            }
+
+            // Decode the payload (second part)
+            var payload = parts[1];
+
+            // Add padding if necessary
+            switch (payload.Length % 4)
+            {
+                case 2: payload += "=="; break;
+                case 3: payload += "="; break;
+            }
+
+            // Base64 decode
+            var payloadBytes = Convert.FromBase64String(payload);
+            var payloadJson = System.Text.Encoding.UTF8.GetString(payloadBytes);
+
+            // Parse JSON to extract email
+            using var doc = System.Text.Json.JsonDocument.Parse(payloadJson);
+            if (doc.RootElement.TryGetProperty("email", out var emailElement))
+            {
+                return emailElement.GetString() ?? string.Empty;
+            }
+
+            return string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+}

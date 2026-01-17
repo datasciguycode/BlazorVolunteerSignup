@@ -1,0 +1,434 @@
+﻿@page "/43tZXXrFBQOjvefAipdXXyXzN3mxPiYI"
+@using Volunteer.Models
+@using Volunteer.Services
+@using Microsoft.JSInterop
+@inject ISupabaseService SupabaseService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Sign Me Up!</PageTitle>
+
+<style>
+    body {
+        background-color: #f5f5f5;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
+
+    .page-header img {
+        max-width: 300px;
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+    .page-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 400;
+        opacity: 0.95;
+    }
+
+    .page-content {
+        padding: 30px;
+    }
+
+    .page-content p {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .form-field {
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+
+    .form-field fluent-text-field {
+        width: 100% !important;
+        display: block !important;
+        --textfield-filled-background-rest: transparent;
+        font-size: 16px;
+    }
+
+    .form-field fluent-text-field::part(root) {
+        width: 100% !important;
+    }
+
+    .form-field fluent-text-field::part(control) {
+        width: 100% !important;
+        font-size: 16px;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 0.25rem;
+    }
+
+    .submit-button {
+        margin-top: 1.5rem;
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #3ECF8E 0%, #2db876 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 17px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(62, 207, 142, 0.3);
+        transition: transform 0.2s;
+        width: 50%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .submit-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(62, 207, 142, 0.4);
+    }
+
+    .submit-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .message-bar-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .success-container {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .success-emoji {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <img src="/images/logo.png" alt="MCDPTX Logo" />
+        <h3>Volunteer Sign Up - Step 2</h3>
+    </div>
+
+    <div class="page-content">
+        @if (string.IsNullOrWhiteSpace(_authToken) && string.IsNullOrEmpty(_statusMessage))
+        {
+            <div class="message-bar-container">
+                <FluentMessageBar Intent="MessageIntent.Warning">
+                    Please use the magic link sent to your email to access this form.
+                </FluentMessageBar>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_statusMessage))
+        {
+            <div class="message-bar-container">
+                <FluentMessageBar Intent="@_messageIntent">
+                    @_statusMessage
+                </FluentMessageBar>
+            </div>
+        }
+
+        <div class="form-field">
+            <FluentTextField @ref="_firstNameField" @bind-Value="_firstName" Label="First Name"
+                Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))"
+                Autofocus="true" Style="width: 100%;" />
+        </div>
+
+        <div class="form-field">
+            <FluentTextField @ref="_lastNameField" @bind-Value="_lastName" Label="Last Name"
+                Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))" Style="width: 100%;" />
+        </div>
+
+        <div class="form-field">
+            <FluentTextField @ref="_phoneNumberField" @bind-Value="_phoneNumber" @oninput="FormatPhoneNumber" @onfocusout="OnPhoneNumberBlur" Label="Phone Number"
+                Placeholder="(555) 123-4567" Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))"
+                TextFieldType="TextFieldType.Tel" Maxlength="14" Style="width: 100%;" />
+            @if (_phoneNumberTouched && !string.IsNullOrEmpty(_phoneNumber) && !IsValidPhoneNumber(_phoneNumber))
+            {
+                <div class="error-message">Please enter a valid phone number.</div>
+            }
+        </div>
+
+        <div class="form-field">
+            <FluentTextField @ref="_emailField" @bind-Value="_email" Label="Email" Placeholder="example@domain.com"
+                Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))" TextFieldType="TextFieldType.Email" Style="width: 100%;" />
+            @if (!string.IsNullOrEmpty(_email) && !IsValidEmail(_email))
+            {
+                <div class="error-message">Please enter a valid email address.</div>
+            }
+        </div>
+
+        <div class="form-field">
+            <FluentTextField @ref="_zipField" @bind-Value="_zip" @oninput="FormatZip" Label="Zip Code"
+                Placeholder="12345" Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))"
+                TextFieldType="TextFieldType.Text" Maxlength="5" Style="width: 100%;" />
+            @if (!string.IsNullOrEmpty(_zip) && !IsValidZip(_zip))
+            {
+                <div class="error-message">Please enter a valid 5-digit zip code.</div>
+            }
+        </div>
+
+        @* Honeypot field - hidden from humans, visible to bots *@
+        <div style="position: absolute; left: -9999px;" aria-hidden="true">
+            <FluentTextField @bind-Value="_website" Label="Website" Placeholder="https://example.com"
+                TabIndex="-1" autocomplete="off" />
+        </div>
+
+        <button type="button" @onclick="@SubmitMessageAsync"
+            disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName) || string.IsNullOrWhiteSpace(_email) || !IsValidEmail(_email) || string.IsNullOrWhiteSpace(_phoneNumber) || !IsValidPhoneNumber(_phoneNumber) || string.IsNullOrWhiteSpace(_zip) || !IsValidZip(_zip) || string.IsNullOrWhiteSpace(_authToken))"
+            class="submit-button">
+            @if (_isSubmitting)
+            {
+                <span>📧 Sending...</span>
+            }
+            else
+            {
+                <span>✨ Submit</span>
+            }
+        </button>
+    </div>
+</div>
+
+@code {
+    private FluentTextField _firstNameField = default!;
+    private FluentTextField _lastNameField = default!;
+    private FluentTextField _emailField = default!;
+    private FluentTextField _phoneNumberField = default!;
+    private FluentTextField _zipField = default!;
+    private string _firstName = string.Empty;
+    private string _lastName = string.Empty;
+    private string _email = string.Empty;
+    private string _phoneNumber = string.Empty;
+    private string _zip = string.Empty;
+    private string _website = string.Empty; // Honeypot field
+    private string _authToken = string.Empty;
+    private bool _isSubmitting = false;
+    private string _statusMessage = string.Empty;
+    private MessageIntent _messageIntent = MessageIntent.Success;
+    private bool _phoneNumberTouched = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Extract auth token or error from URL hash
+                var urlHash = await JSRuntime.InvokeAsync<string>("getLocationHash");
+                if (!string.IsNullOrEmpty(urlHash))
+                {
+                    var hashParams = System.Web.HttpUtility.ParseQueryString(urlHash.TrimStart('#'));
+
+                    // Check for errors first
+                    var error = hashParams["error"];
+                    var errorDescription = hashParams["error_description"];
+
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        _messageIntent = MessageIntent.Error;
+
+                        // Parse error description for user-friendly message
+                        if (!string.IsNullOrEmpty(errorDescription))
+                        {
+                            var decodedError = System.Web.HttpUtility.UrlDecode(errorDescription);
+                            _statusMessage = decodedError;
+                        }
+                        else
+                        {
+                            _statusMessage = "Authentication failed. Please request a new magic link.";
+                        }
+
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        // No error, check for access token
+                        var accessToken = hashParams["access_token"];
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            _authToken = accessToken;
+                            StateHasChanged();
+                        }
+                    }
+                }
+
+                await Task.Delay(100); // Small delay to ensure DOM is ready
+                _firstNameField?.FocusAsync();
+            }
+            catch { /* Ignore focus errors */ }
+        }
+    }
+
+    private void FormatPhoneNumber(ChangeEventArgs e)
+    {
+        var input = e.Value?.ToString() ?? string.Empty;
+
+        // Remove all non-numeric characters
+        var digitsOnly = System.Text.RegularExpressions.Regex.Replace(input, @"\D", "");
+
+        // Limit to 10 digits
+        if (digitsOnly.Length > 10)
+        {
+            digitsOnly = digitsOnly.Substring(0, 10);
+        }
+
+        // Apply formatting
+        if (digitsOnly.Length == 0)
+        {
+            _phoneNumber = string.Empty;
+        }
+        else if (digitsOnly.Length <= 3)
+        {
+            _phoneNumber = $"({digitsOnly}";
+        }
+        else if (digitsOnly.Length <= 6)
+        {
+            _phoneNumber = $"({digitsOnly.Substring(0, 3)}) {digitsOnly.Substring(3)}";
+        }
+        else
+        {
+            _phoneNumber = $"({digitsOnly.Substring(0, 3)}) {digitsOnly.Substring(3, 3)}-{digitsOnly.Substring(6)}";
+        }
+    }
+
+    private void OnPhoneNumberBlur(FocusEventArgs e)
+    {
+        _phoneNumberTouched = true;
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        var emailRegex = new System.Text.RegularExpressions.Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
+        return emailRegex.IsMatch(email);
+    }
+
+    private bool IsValidPhoneNumber(string phoneNumber)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            return false;
+
+        // Remove common formatting characters
+        var digitsOnly = System.Text.RegularExpressions.Regex.Replace(phoneNumber, @"[\s\-\(\)\.]", "");
+
+        // Require exactly 10 digits
+        return digitsOnly.Length == 10 && System.Text.RegularExpressions.Regex.IsMatch(digitsOnly, @"^\d{10}$");
+    }
+
+    private void FormatZip(ChangeEventArgs e)
+    {
+        var input = e.Value?.ToString() ?? string.Empty;
+
+        // Remove all non-numeric characters and limit to 5 digits
+        var digitsOnly = System.Text.RegularExpressions.Regex.Replace(input, @"\D", "");
+
+        if (digitsOnly.Length > 5)
+        {
+            digitsOnly = digitsOnly.Substring(0, 5);
+        }
+
+        _zip = digitsOnly;
+    }
+
+    private bool IsValidZip(string zip)
+    {
+        if (string.IsNullOrWhiteSpace(zip))
+            return false;
+
+        // Require exactly 5 digits
+        return zip.Length == 5 && System.Text.RegularExpressions.Regex.IsMatch(zip, @"^\d{5}$");
+    }
+
+    private async Task SubmitMessageAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName) || string.IsNullOrWhiteSpace(_email)
+        || !IsValidEmail(_email) || string.IsNullOrWhiteSpace(_phoneNumber) || !IsValidPhoneNumber(_phoneNumber)
+        || string.IsNullOrWhiteSpace(_zip) || !IsValidZip(_zip) || string.IsNullOrWhiteSpace(_authToken))
+        {
+            return;
+        }
+
+        // Honeypot validation - if filled, it's likely a bot
+        if (!string.IsNullOrEmpty(_website))
+        {
+            // Silently fail to avoid alerting the bot
+            _messageIntent = MessageIntent.Success;
+            _statusMessage = "Thank you! Your information has been sent successfully.";
+            _firstName = string.Empty;
+            _lastName = string.Empty;
+            _email = string.Empty;
+            _phoneNumber = string.Empty;
+            _zip = string.Empty;
+            _website = string.Empty;
+            _phoneNumberTouched = false;
+            return;
+        }
+
+        _isSubmitting = true;
+        _statusMessage = string.Empty;
+
+        try
+        {
+            var volunteerMessage = new VolunteerMessage
+            {
+                FirstName = _firstName.Trim(),
+                LastName = _lastName.Trim(),
+                Email = _email.Trim(),
+                PhoneNumber = _phoneNumber.Trim(),
+                Zip = _zip.Trim(),
+                Body = "<p>Hello World</p>"
+            };
+
+            var (success, errorMessage) = await SupabaseService.SendVolunteerMessageAsync(volunteerMessage, _authToken);
+
+            if (success)
+            {
+                _messageIntent = MessageIntent.Success;
+                _statusMessage = "Thank you! Your information has been sent successfully.  You should receive a welcome email shortly.";
+                _firstName = string.Empty;
+                _lastName = string.Empty;
+                _email = string.Empty;
+                _phoneNumber = string.Empty;
+                _zip = string.Empty;
+                _phoneNumberTouched = false;
+            }
+            else
+            {
+                _messageIntent = MessageIntent.Error;
+                _statusMessage = $"Failed to send your information. {errorMessage}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _messageIntent = MessageIntent.Error;
+            _statusMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

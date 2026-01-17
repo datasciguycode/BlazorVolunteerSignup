@@ -1,0 +1,300 @@
+@page "/W5bcgBfSV75KU3bSIDZYjcBFpooxsq8L"
+@using Volunteer.Services
+@using Microsoft.JSInterop
+@inject ISupabaseService SupabaseService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Email Me</PageTitle>
+
+<style>
+    body {
+        background-color: #f5f5f5;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, #0066cc 0%, #004999 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
+
+    .page-header img {
+        max-width: 300px;
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+    .page-header h1 {
+        margin: 0 0 5px 0;
+        font-size: 26px;
+        font-weight: 600;
+    }
+
+    .page-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 400;
+        opacity: 0.95;
+    }
+
+    .page-content {
+        padding: 30px;
+    }
+
+    .page-content p {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .page-content a {
+        color: #0066cc;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .page-content a:hover {
+        text-decoration: underline;
+    }
+
+    .form-field {
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+
+    .form-field fluent-text-field {
+        width: 100% !important;
+        display: block !important;
+        --textfield-filled-background-rest: transparent;
+        font-size: 16px;
+    }
+
+    .form-field fluent-text-field::part(root) {
+        width: 100% !important;
+    }
+
+    .form-field fluent-text-field::part(control) {
+        width: 100% !important;
+        font-size: 16px;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 0.25rem;
+    }
+
+    .highlight-box {
+        background-color: #e7f3ff;
+        border-left: 4px solid #0066cc;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    .submit-button {
+        margin-top: 1rem;
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #3ECF8E 0%, #2db876 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 17px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(62, 207, 142, 0.3);
+        transition: transform 0.2s;
+        width: 50%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .submit-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(62, 207, 142, 0.4);
+    }
+
+    .submit-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .message-bar-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .success-container {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .success-emoji {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="page-container">
+    <div class="page-header">
+        <img src="images/logo.png" alt="MCDPTX Logo" />
+        <h3>Volunteer Sign Up - Step 1</h3>
+    </div>
+
+    <div class="page-content">
+        @if (_emailSent && !string.IsNullOrEmpty(_statusMessage))
+        {
+            <div class="success-container">
+                <div class="success-emoji">✉️</div>
+                <FluentMessageBar Intent="@_messageIntent">
+                    @((MarkupString)_statusMessage)
+                </FluentMessageBar>
+            </div>
+        }
+
+        @if (!_emailSent)
+        {
+            @if (!string.IsNullOrEmpty(_statusMessage))
+            {
+                <div class="message-bar-container">
+                    <FluentMessageBar Intent="@_messageIntent">
+                        @((MarkupString)_statusMessage)
+                    </FluentMessageBar>
+                </div>
+            }
+
+            <p>
+                Hi! &nbsp;Please enter your email address below, and click the 'Sign Up' button to receive a secure signup link in your inbox from <a href="https://supabase.com/docs/guides/auth" target="_blank">Supabase Auth</a>.
+            </p>
+
+            <div class="form-field">
+                <FluentTextField @ref="_emailField" Value="@_email" @oninput="@OnEmailInput" Label="Email Address" Placeholder="example@domain.com"
+                    Required="true" Disabled="@_isSubmitting" TextFieldType="TextFieldType.Email" Autofocus="true"
+                    Style="width: 100%;" />
+                @if (!string.IsNullOrEmpty(_email) && !IsValidEmail(_email))
+                {
+                    <div class="error-message">
+                        Please enter a valid email address.
+                    </div>
+                }
+            </div>
+
+            <div class="highlight-box">
+                <p style="margin: 0;"><strong>ℹ️ Why do we use email links?</strong></p>
+                <p style="margin: 10px 0 0 0;">This method helps us validate your email and maintain security without the need for passwords. The link will expire in 1 hour, but you can always request a new one.</p>
+            </div>
+
+            <p style="margin-bottom: 1.5rem; font-size: 14px; color: #666;">
+                Questions? Contact us at <a href="mailto:volunteercoordinator@mcdptx.org">volunteercoordinator@mcdptx.org</a>
+            </p>
+
+            <button type="button" @onclick="@SubmitEmailAsync"
+                disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_email) || !IsValidEmail(_email))"
+                class="submit-button">
+                @if (_isSubmitting)
+                {
+                    <span>📧 Sending...</span>
+                }
+                else
+                {
+                    <span>✨ Sign Up</span>
+                }
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    private FluentTextField _emailField = default!;
+    private string _email = string.Empty;
+    private bool _isSubmitting = false;
+    private bool _emailSent = false;
+    private string _statusMessage = string.Empty;
+    private MessageIntent _messageIntent = MessageIntent.Success;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await Task.Delay(100); // Small delay to ensure DOM is ready
+                _emailField?.FocusAsync();
+
+            }
+            catch { /* Ignore focus errors */ }
+        }
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        var emailRegex = new System.Text.RegularExpressions.Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
+        return emailRegex.IsMatch(email);
+    }
+
+    private void OnEmailInput(ChangeEventArgs e)
+    {
+        _email = e.Value?.ToString() ?? string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task SubmitEmailAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_email) || !IsValidEmail(_email))
+        {
+            return;
+        }
+
+        _isSubmitting = true;
+        _statusMessage = string.Empty;
+
+        try
+        {
+            // Build the redirect URL to the SignUp page using the current base URI
+            var baseUri = NavigationManager.BaseUri.TrimEnd('/');
+            var redirectUrl = $"{baseUri}/43tZXXrFBQOjvefAipdXXyXzN3mxPiYI";
+
+            var emailBody = "<p>Hello World</p>";
+            var (success, errorMessage) = await SupabaseService.SendSignupEmailAsync(_email.Trim(), redirectUrl, emailBody);
+
+            if (success)
+            {
+                _messageIntent = MessageIntent.Success;
+                _statusMessage = "Thank you! &nbsp;Please check your inbox for the signup link. &nbsp;:-)";
+                _emailSent = true;
+                _email = string.Empty;
+            }
+            else
+            {
+                _messageIntent = MessageIntent.Error;
+                _statusMessage = $"Failed to send signup email. {errorMessage}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _messageIntent = MessageIntent.Error;
+            _statusMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

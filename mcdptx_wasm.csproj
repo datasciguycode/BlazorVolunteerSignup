@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <StaticWebAssetBasePath Condition="$(Configuration) == 'Release'">mcdptx_wasm</StaticWebAssetBasePath>
+  </PropertyGroup>
+
+</Project>
