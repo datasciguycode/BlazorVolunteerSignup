@@ -26,6 +26,19 @@
     "./_framework/dotnet.runtime.js": "sha256-6QIZYgG+ftoT9N1H1EEJeXIhD/qbKqEcnmawDskiwdI="
   }
 }</script>
+    <script>
+        (function ()
+        {
+            var redirect = sessionStorage.redirect;
+            delete sessionStorage.redirect;
+            if (redirect && redirect !== location.pathname.slice(1))
+            {
+                history.replaceState(null, null,
+                    '/' + redirect.replace('BlazorVolunteerSignup/', '')
+                );
+            }
+        })();
+    </script>
 </head>
 
 <body>

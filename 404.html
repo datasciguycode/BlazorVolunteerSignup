@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+        // Redirect to base with path as hash - Blazor will handle it
+        var segment = '/BlazorVolunteerSignup';
+        var path = window.location.pathname;
+        if (path.startsWith(segment))
+        {
+            path = path.substring(segment.length);
+        }
+        var redirectUrl = segment + '/#' + path + window.location.search;
+        window.location.replace(redirectUrl);
+    </script>
+</head>
+
+<body>
+    <p>Redirecting...</p>
+</body>
+
+</html>
