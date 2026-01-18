@@ -399,7 +399,7 @@
                 Email = _email.Trim(),
                 PhoneNumber = _phoneNumber.Trim(),
                 Zip = _zip.Trim(),
-                Body = "<p>Hello World</p>"
+                Body = _firstName.Trim()
             };
 
             var (success, errorMessage) = await SupabaseService.SendVolunteerMessageAsync(volunteerMessage, _authToken);
