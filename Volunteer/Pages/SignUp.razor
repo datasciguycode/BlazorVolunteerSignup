@@ -110,6 +110,7 @@
     }
 
     .message-bar-container {
+        margin-top: 1rem;
         margin-bottom: 1.5rem;
     }
 
@@ -376,7 +377,7 @@
         {
             // Silently fail to avoid alerting the bot
             _messageIntent = MessageIntent.Success;
-            _statusMessage = "<br /><br />Thank you! Your information has been sent successfully.";
+            _statusMessage = "Thank you! Your information has been sent successfully.";
             _firstName = string.Empty;
             _lastName = string.Empty;
             _email = string.Empty;
