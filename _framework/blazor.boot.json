@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Volunteer",
   "resources": {
-    "hash": "sha256-VFBhJhkH8LLH3JQ9eFiwJ1tX4v6xbcUwwrp5rdcM4/c=",
+    "hash": "sha256-u6rgVKr1dvprKKoxPCSGsaDPP5Z6hgu51N9NPIn2Mv8=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.2s0lufs19v.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Forms.6o12tcdyor.wasm": "Microsoft.AspNetCore.Components.Forms.wasm",
@@ -51,7 +51,7 @@
       "System.Web.HttpUtility.k1asjvl1uo.wasm": "System.Web.HttpUtility.wasm",
       "System.t4d4s3f398.wasm": "System.wasm",
       "System.Private.CoreLib.xnikyj693j.wasm": "System.Private.CoreLib.wasm",
-      "Volunteer.mw9n20jlqc.wasm": "Volunteer.wasm",
+      "Volunteer.1smhtmhf1f.wasm": "Volunteer.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.noby4tlk4d.js": "dotnet.native.js",
       "dotnet.native.qe75a9vfqn.wasm": "dotnet.native.wasm",
@@ -125,7 +125,7 @@
       "System.Text.RegularExpressions.5x7mt3xord.wasm": "sha256-mQq9IYQW0yp3PHaxygCXb0Sz1VG+8CXwZSekdAF1kKs=",
       "System.Web.HttpUtility.k1asjvl1uo.wasm": "sha256-2IANmUQmRgdBVLyW/yUGWfMzJccLLI7gX+zJ88C8sdc=",
       "System.t4d4s3f398.wasm": "sha256-fVP2BxRRKpBA0PmBbKxmO45bXDrAXVn1GthlDclLbeU=",
-      "Volunteer.mw9n20jlqc.wasm": "sha256-GrzYPp1IMJv2KfvJYqhAy7iBeVwcFKCt6lB/RJspYVk="
+      "Volunteer.1smhtmhf1f.wasm": "sha256-kbLQ9zHoRftiZ9foHMITRS+4SulTyAj8iHZmX6Vr0bw="
     },
     "libraryInitializers": {
       "_content/Microsoft.FluentUI.AspNetCore.Components/Microsoft.FluentUI.AspNetCore.Components.lib.module.js": "sha256-kXoVJYWXAaKRmlbeYCi7ruHaV6Z2gky3cH2L8p0CcPE="
