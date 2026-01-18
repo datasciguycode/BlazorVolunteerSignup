@@ -271,7 +271,7 @@
             var baseUri = NavigationManager.BaseUri.TrimEnd('/');
             var redirectUrl = $"{baseUri}/43tZXXrFBQOjvefAipdXXyXzN3mxPiYI";
 
-            @* var emailBody = "<p>Hello World</p>"; *@
+            var emailBody = "";
             var (success, errorMessage) = await SupabaseService.SendSignupEmailAsync(_email.Trim(), redirectUrl, emailBody);
 
             if (success)
