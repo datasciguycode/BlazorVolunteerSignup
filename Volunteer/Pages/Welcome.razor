@@ -136,7 +136,7 @@
 
 <div class="page-container">
     <div class="page-header">
-        <img src="/images/logo.png" alt="MCDPTX Logo" />
+        <img src="images/logo.png" alt="MCDPTX Logo" />
         <h3>Welcome to the Party! Please select your interests below:</h3>
     </div>
 
@@ -522,17 +522,17 @@
 
             // Call update-interests function
             var (interestsSuccess, interestsError) = await SupabaseService.UpdateVolunteerInterestsAsync(
-                userEmail,
-                selectedInterestIds,
-                _authToken
+            userEmail,
+            selectedInterestIds,
+            _authToken
             );
 
             // Call update-volunteer function
             var (volunteerSuccess, volunteerError) = await SupabaseService.UpdateVolunteerAsync(
-                userEmail,
-                _aboutMyself,
-                _emergencyContact,
-                _authToken
+            userEmail,
+            _aboutMyself,
+            _emergencyContact,
+            _authToken
             );
 
             if (interestsSuccess && volunteerSuccess)
