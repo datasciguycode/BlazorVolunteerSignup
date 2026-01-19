@@ -45,6 +45,15 @@
     <script>
         // Safe JS interop helper for getting URL hash (replaces eval usage)
         window.getLocationHash = () => window.location.hash;
+
+        // Focus element by ID (finds textarea inside FluentTextArea component)
+        window.focusElement = (id) => {
+            const element = document.getElementById(id);
+            if (element) {
+                const textarea = element.querySelector('textarea') || element;
+                textarea.focus();
+            }
+        };
     </script>
     <script src="_framework/blazor.webassembly.yiodnjoszm.js"></script>
 </body>
