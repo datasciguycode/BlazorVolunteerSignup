@@ -11,4 +11,7 @@ public class Interest
 
     [JsonPropertyName("interest")]
     public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("order_by")]
+    public int? OrderBy { get; set; }
 }

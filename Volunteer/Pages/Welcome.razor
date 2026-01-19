@@ -132,16 +132,26 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(0, 102, 204, 0.4);
     }
+
+    /* Tab styling */
+    fluent-tabs::part(tablist),
+    fluent-tab {
+        font-size: 16px !important;
+    }
+
+    .tab-content {
+        padding-top: 1.5rem;
+    }
 </style>
 
 <div class="page-container">
     <div class="page-header">
         <img src="images/logo.png" alt="MCDPTX Logo" />
-        <h3>Welcome to the Party! Please select your interests below:</h3>
+        <h3>Welcome to the Party! <br /><br />Please select your skills & interests below:</h3>
     </div>
 
     <div class="page-content">
-        @if (string.IsNullOrWhiteSpace(_authToken) && string.IsNullOrEmpty(_statusMessage))
+        @if (string.IsNullOrWhiteSpace(_authToken) && string.IsNullOrEmpty(_statusMessage) && !_isLoading)
         {
             <div class="message-bar-container">
                 <FluentMessageBar Intent="MessageIntent.Warning">
@@ -166,17 +176,26 @@
             </div>
         }
 
+        @if (_isLoading)
+        {
+            <div style="text-align: center; padding: 2rem;">
+                <FluentProgressRing />
+                <div style="margin-top: 1rem;">Loading...</div>
+            </div>
+        }
+        else
+        {
         <FluentTabs @bind-ActiveTabId="@_activeTabId" Style="width: 100%;">
-            <FluentTab Label="Interests" Id="tab-interests">
+            <FluentTab Label="Role" Id="tab-role">
+                <div class="tab-content">
                 <div class="checkbox-list">
-                    <h3>Options you find interesting from each tab below:</h3>
                     @if (_isLoading)
                     {
-                        <div>Loading interests...</div>
+                        <div>Loading roles...</div>
                     }
                     else if (_checkboxOptions.Count == 0)
                     {
-                        <div>No interests available.</div>
+                        <div>No roles available.</div>
                     }
                     else
                     {
@@ -193,11 +212,12 @@
                 <button type="button" @onclick="@(() => _activeTabId = "tab-activities")" class="next-button">
                     Next &gt;&gt;
                 </button>
+                </div>
             </FluentTab>
 
             <FluentTab Label="Activities" Id="tab-activities">
+                <div class="tab-content">
                 <div class="checkbox-list">
-                    <h3>Select your activities:</h3>
                     @if (_isLoading)
                     {
                         <div>Loading activities...</div>
@@ -221,11 +241,12 @@
                 <button type="button" @onclick="@(() => _activeTabId = "tab-outreach")" class="next-button">
                     Next &gt;&gt;
                 </button>
+                </div>
             </FluentTab>
 
             <FluentTab Label="Outreach" Id="tab-outreach">
+                <div class="tab-content">
                 <div class="checkbox-list">
-                    <h3>Select your outreach sub-committee interests:</h3>
                     @if (_isLoading)
                     {
                         <div>Loading outreach sub-committee items...</div>
@@ -246,21 +267,22 @@
                         }
                     }
                 </div>
-                <button type="button" @onclick="@(() => _activeTabId = "tab-standing")" class="next-button">
+                <button type="button" @onclick="@(() => _activeTabId = "tab-committee")" class="next-button">
                     Next &gt;&gt;
                 </button>
+                </div>
             </FluentTab>
 
-            <FluentTab Label="Standing" Id="tab-standing">
+            <FluentTab Label="Committee" Id="tab-committee">
+                <div class="tab-content">
                 <div class="checkbox-list">
-                    <h3>Select your standing committee interests:</h3>
                     @if (_isLoading)
                     {
-                        <div>Loading standing committee items...</div>
+                        <div>Loading committee items...</div>
                     }
                     else if (_standingCommitteeOptions.Count == 0)
                     {
-                        <div>No standing committee items available.</div>
+                        <div>No committee items available.</div>
                     }
                     else
                     {
@@ -274,18 +296,50 @@
                         }
                     }
                 </div>
-                <button type="button" @onclick="@(() => _activeTabId = "tab-aboutme")" class="next-button">
+                <button type="button" @onclick="@(() => _activeTabId = "tab-languages")" class="next-button">
                     Next &gt;&gt;
                 </button>
+                </div>
+            </FluentTab>
+
+            <FluentTab Label="Language" Id="tab-languages">
+
+                <div class="tab-content">
+                <div class="checkbox-list">
+                    <p>Please check only if you are relatively fluent in:</p>
+                    @if (_isLoading)
+                    {
+                        <div>Loading languages...</div>
+                    }
+                    else if (_languageOptions.Count == 0)
+                    {
+                        <div>No languages available.</div>
+                    }
+                    else
+                    {
+                        @foreach (var option in _languageOptions)
+                        {
+                            <div class="checkbox-item">
+                                <FluentCheckbox @bind-Value="option.IsSelected" Disabled="@(_isSubmitting || _isSubmitted)">
+                                    @option.Label
+                                </FluentCheckbox>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" @onclick="@(() => NavigateToAboutMe())" class="next-button">
+                    Next &gt;&gt;
+                </button>
+                </div>
             </FluentTab>
 
             <FluentTab Label="About Me" Id="tab-aboutme">
+                <div class="tab-content">
                 <div style="margin-bottom: 1rem;">
-                    <h3>Tell us about yourself:</h3>
                     <div class="form-field">
-                        <FluentTextArea @bind-Value="_aboutMyself" Label="About Myself"
+                        <FluentTextArea @bind-Value="_aboutMyself" Label="Tell us about yourself:"
                             Disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
-                            Rows="6" Style="width: 100%;" Maxlength="100" />
+                            Rows="6" Style="width: 100%;" Maxlength="100" Id="aboutMyselfTextArea" />
                     </div>
                     <div class="form-field">
                         <FluentTextArea @bind-Value="_emergencyContact" Label="Emergency Contact"
@@ -305,8 +359,10 @@
                         <span>✨ Submit</span>
                     }
                 </button>
+                </div>
             </FluentTab>
         </FluentTabs>
+        }
     </div>
 </div>
 
@@ -322,21 +378,35 @@
     private List<CheckboxOption> _activityOptions = new();
     private List<CheckboxOption> _outreachSubCommitteeOptions = new();
     private List<CheckboxOption> _standingCommitteeOptions = new();
+    private List<CheckboxOption> _languageOptions = new();
 
     private string _aboutMyself = string.Empty;
     private string _emergencyContact = string.Empty;
 
-    private string _activeTabId = "tab-interests";
+    private string _activeTabId = "tab-role";
+    private string _previousTabId = "tab-role";
     private string _authToken = string.Empty;
     private string _userEmail = string.Empty;
     private bool _isSubmitting = false;
     private bool _isSubmitted = false;
-    private bool _isLoading = false;
+    private bool _isLoading = true;
     private string _statusMessage = string.Empty;
     private MessageIntent _messageIntent = MessageIntent.Success;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Check if we navigated to About Me tab
+        if (_activeTabId == "tab-aboutme" && _previousTabId != "tab-aboutme" && !_isLoading)
+        {
+            _previousTabId = _activeTabId;
+            await Task.Delay(50);
+            await JSRuntime.InvokeVoidAsync("focusElement", "aboutMyselfTextArea");
+        }
+        else if (_activeTabId != _previousTabId)
+        {
+            _previousTabId = _activeTabId;
+        }
+
         if (firstRender)
         {
             try
@@ -401,32 +471,15 @@
         {
             _isLoading = true;
 
-            // Load interests (interest_type_id = 1)
+            // Load interests (interest_type_id = 2)
             var interests = await SupabaseService.GetInterestsAsync(_authToken);
 
             if (interests != null && interests.Count > 0)
             {
-                _checkboxOptions = interests.Select(i => new CheckboxOption
+                _activityOptions = interests.Select(i => new CheckboxOption
                 {
                     Id = i.Id,
                     Label = i.Name,
-                    IsSelected = false
-                }).ToList();
-            }
-            else
-            {
-                _checkboxOptions = new List<CheckboxOption>();
-            }
-
-            // Load activities (interest_type_id = 2)
-            var activities = await SupabaseService.GetActivitiesAsync(_authToken);
-
-            if (activities != null && activities.Count > 0)
-            {
-                _activityOptions = activities.Select(a => new CheckboxOption
-                {
-                    Id = a.Id,
-                    Label = a.Name,
                     IsSelected = false
                 }).ToList();
             }
@@ -468,6 +521,23 @@
             {
                 _standingCommitteeOptions = new List<CheckboxOption>();
             }
+
+            // Load languages (interest_type_id = 5)
+            var languages = await SupabaseService.GetLanguagesAsync(_authToken);
+
+            if (languages != null && languages.Count > 0)
+            {
+                _languageOptions = languages.Select(l => new CheckboxOption
+                {
+                    Id = l.Id,
+                    Label = l.Name,
+                    IsSelected = false
+                }).ToList();
+            }
+            else
+            {
+                _languageOptions = new List<CheckboxOption>();
+            }
         }
         catch
         {
@@ -476,11 +546,17 @@
             _activityOptions = new List<CheckboxOption>();
             _outreachSubCommitteeOptions = new List<CheckboxOption>();
             _standingCommitteeOptions = new List<CheckboxOption>();
+            _languageOptions = new List<CheckboxOption>();
         }
         finally
         {
             _isLoading = false;
         }
+    }
+
+    private void NavigateToAboutMe()
+    {
+        _activeTabId = "tab-aboutme";
     }
 
     private async Task SubmitMessageAsync()
@@ -506,6 +582,9 @@
             .Where(x => x.IsSelected)
             .Select(x => x.Id))
             .Concat(_standingCommitteeOptions
+            .Where(x => x.IsSelected)
+            .Select(x => x.Id))
+            .Concat(_languageOptions
             .Where(x => x.IsSelected)
             .Select(x => x.Id))
             .ToList();

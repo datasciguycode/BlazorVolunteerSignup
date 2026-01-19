@@ -163,6 +163,11 @@
                 <FluentMessageBar Intent="@_messageIntent">
                     @((MarkupString)_statusMessage)
                 </FluentMessageBar>
+                <div style="margin-top: 1rem;">
+                    <FluentMessageBar Intent="MessageIntent.Success">
+                        If missing email, please check your spam folder.
+                    </FluentMessageBar>
+                </div>
             </div>
         }
 

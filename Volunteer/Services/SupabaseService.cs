@@ -252,7 +252,7 @@ public class SupabaseService : ISupabaseService
             _logger.LogInformation("Fetching interests from Supabase");
 
             var request = new HttpRequestMessage(HttpMethod.Get,
-                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id&interest_type_id=eq.1&order=interest.asc");
+                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id,order_by&interest_type_id=eq.2&order=order_by.asc");
 
             request.Headers.Add("apikey", _settings.AnonKey);
             request.Headers.Add("Accept", "application/json");
@@ -287,48 +287,6 @@ public class SupabaseService : ISupabaseService
 
     // -------------------------------------------------------------------------------------------------
 
-    public async Task<List<Interest>> GetActivitiesAsync(string? authToken = null)
-    {
-        try
-        {
-            _logger.LogInformation("Fetching activities from Supabase");
-
-            var request = new HttpRequestMessage(HttpMethod.Get,
-                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id&interest_type_id=eq.2&order=interest.asc");
-
-            request.Headers.Add("apikey", _settings.AnonKey);
-            request.Headers.Add("Accept", "application/json");
-
-            // Add Authorization header if auth token is provided
-            if (!string.IsNullOrEmpty(authToken))
-            {
-                request.Headers.Add("Authorization", $"Bearer {authToken}");
-            }
-
-            var response = await _httpClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var activities = await response.Content.ReadFromJsonAsync<List<Interest>>();
-                _logger.LogInformation("Successfully fetched {Count} activities", activities?.Count ?? 0);
-                return activities ?? new List<Interest>();
-            }
-
-            var errorContent = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to fetch activities. Status: {StatusCode}, Error: {Error}",
-                response.StatusCode, errorContent);
-
-            return new List<Interest>();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Exception occurred while fetching activities from Supabase");
-            return new List<Interest>();
-        }
-    }
-
-    // -------------------------------------------------------------------------------------------------
-
     public async Task<List<Interest>> GetOutreachSubCommitteeAsync(string? authToken = null)
     {
         try
@@ -336,7 +294,7 @@ public class SupabaseService : ISupabaseService
             _logger.LogInformation("Fetching outreach sub-committee items from Supabase");
 
             var request = new HttpRequestMessage(HttpMethod.Get,
-                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id&interest_type_id=eq.3&order=interest.asc");
+                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id,order_by&interest_type_id=eq.3&order=order_by.asc");
 
             request.Headers.Add("apikey", _settings.AnonKey);
             request.Headers.Add("Accept", "application/json");
@@ -378,7 +336,7 @@ public class SupabaseService : ISupabaseService
             _logger.LogInformation("Fetching standing committee items from Supabase");
 
             var request = new HttpRequestMessage(HttpMethod.Get,
-                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id&interest_type_id=eq.4&order=interest.asc");
+                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id,order_by&interest_type_id=eq.4&order=order_by.asc");
 
             request.Headers.Add("apikey", _settings.AnonKey);
             request.Headers.Add("Accept", "application/json");
@@ -407,6 +365,48 @@ public class SupabaseService : ISupabaseService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception occurred while fetching standing committee items from Supabase");
+            return new List<Interest>();
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------
+
+    public async Task<List<Interest>> GetLanguagesAsync(string? authToken = null)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching languages from Supabase");
+
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id,order_by&interest_type_id=eq.5&order=order_by.asc");
+
+            request.Headers.Add("apikey", _settings.AnonKey);
+            request.Headers.Add("Accept", "application/json");
+
+            // Add Authorization header if auth token is provided
+            if (!string.IsNullOrEmpty(authToken))
+            {
+                request.Headers.Add("Authorization", $"Bearer {authToken}");
+            }
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var items = await response.Content.ReadFromJsonAsync<List<Interest>>();
+                _logger.LogInformation("Successfully fetched {Count} languages", items?.Count ?? 0);
+                return items ?? new List<Interest>();
+            }
+
+            var errorContent = await response.Content.ReadAsStringAsync();
+            _logger.LogError("Failed to fetch languages. Status: {StatusCode}, Error: {Error}",
+                response.StatusCode, errorContent);
+
+            return new List<Interest>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception occurred while fetching languages from Supabase");
             return new List<Interest>();
         }
     }
