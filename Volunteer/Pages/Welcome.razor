@@ -471,6 +471,23 @@
         {
             _isLoading = true;
 
+            // Load roles (interest_type_id = 1)
+            var roles = await SupabaseService.GetRolesAsync(_authToken);
+
+            if (roles != null && roles.Count > 0)
+            {
+                _checkboxOptions = roles.Select(r => new CheckboxOption
+                {
+                    Id = r.Id,
+                    Label = r.Name,
+                    IsSelected = false
+                }).ToList();
+            }
+            else
+            {
+                _checkboxOptions = new List<CheckboxOption>();
+            }
+
             // Load interests (interest_type_id = 2)
             var interests = await SupabaseService.GetInterestsAsync(_authToken);
 

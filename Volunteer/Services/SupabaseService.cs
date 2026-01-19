@@ -245,6 +245,48 @@ public class SupabaseService : ISupabaseService
 
     // -------------------------------------------------------------------------------------------------
 
+    public async Task<List<Interest>> GetRolesAsync(string? authToken = null)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching roles from Supabase");
+
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                $"{_settings.Url}/rest/v1/interest?select=id,interest,interest_type_id,order_by&interest_type_id=eq.1&order=order_by.asc");
+
+            request.Headers.Add("apikey", _settings.AnonKey);
+            request.Headers.Add("Accept", "application/json");
+
+            // Add Authorization header if auth token is provided
+            if (!string.IsNullOrEmpty(authToken))
+            {
+                request.Headers.Add("Authorization", $"Bearer {authToken}");
+            }
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var roles = await response.Content.ReadFromJsonAsync<List<Interest>>();
+                _logger.LogInformation("Successfully fetched {Count} roles", roles?.Count ?? 0);
+                return roles ?? new List<Interest>();
+            }
+
+            var errorContent = await response.Content.ReadAsStringAsync();
+            _logger.LogError("Failed to fetch roles. Status: {StatusCode}, Error: {Error}",
+                response.StatusCode, errorContent);
+
+            return new List<Interest>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception occurred while fetching roles from Supabase");
+            return new List<Interest>();
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------
+
     public async Task<List<Interest>> GetInterestsAsync(string? authToken = null)
     {
         try
