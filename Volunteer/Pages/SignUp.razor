@@ -132,6 +132,15 @@
     </div>
 
     <div class="page-content">
+        @if (_isCheckingVolunteer)
+        {
+            <div style="text-align: center; padding: 2rem;">
+                <FluentProgressRing />
+                <div style="margin-top: 1rem;">Loading...</div>
+            </div>
+        }
+        else
+        {
         @if (string.IsNullOrWhiteSpace(_authToken) && string.IsNullOrEmpty(_statusMessage))
         {
             <div class="message-bar-container">
@@ -208,6 +217,7 @@
                 <span>✨ Submit</span>
             }
         </button>
+        }
     </div>
 </div>
 
@@ -225,6 +235,7 @@
     private string _website = string.Empty; // Honeypot field
     private string _authToken = string.Empty;
     private bool _isSubmitting = false;
+    private bool _isCheckingVolunteer = true;
     private string _statusMessage = string.Empty;
     private MessageIntent _messageIntent = MessageIntent.Success;
     private bool _phoneNumberTouched = false;
@@ -260,6 +271,7 @@
                             _statusMessage = "Authentication failed. Please request a new magic link.";
                         }
 
+                        _isCheckingVolunteer = false;
                         StateHasChanged();
                     }
                     else
@@ -279,11 +291,12 @@
                                 NavigationManager.NavigateTo(welcomeUrl, forceLoad: true);
                                 return;
                             }
-
-                            StateHasChanged();
                         }
                     }
                 }
+
+                _isCheckingVolunteer = false;
+                StateHasChanged();
 
                 await Task.Delay(100); // Small delay to ensure DOM is ready
                 _firstNameField?.FocusAsync();
