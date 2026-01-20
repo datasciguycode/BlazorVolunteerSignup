@@ -453,4 +453,41 @@ public class SupabaseService : ISupabaseService
         }
     }
 
+    // -------------------------------------------------------------------------------------------------
+
+    public async Task<bool> VolunteerExistsAsync(string authToken)
+    {
+        try
+        {
+            _logger.LogInformation("Checking if volunteer exists for authenticated user");
+
+            var request = new HttpRequestMessage(HttpMethod.Post, _settings.CheckVolunteerUrl);
+
+            // Add Authorization header with the user's auth token
+            request.Headers.Add("Authorization", $"Bearer {authToken}");
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(content);
+                if (doc.RootElement.TryGetProperty("exists", out var existsElement))
+                {
+                    var exists = existsElement.GetBoolean();
+                    _logger.LogInformation("Volunteer exists check: {Exists}", exists);
+                    return exists;
+                }
+            }
+
+            _logger.LogWarning("Failed to check volunteer existence. Status: {StatusCode}", response.StatusCode);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception occurred while checking volunteer existence");
+            return false;
+        }
+    }
+
 }

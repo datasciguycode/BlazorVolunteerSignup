@@ -4,6 +4,7 @@
 @using Microsoft.JSInterop
 @inject ISupabaseService SupabaseService
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <PageTitle>Sign Me Up!</PageTitle>
 
@@ -268,6 +269,17 @@
                         if (!string.IsNullOrEmpty(accessToken))
                         {
                             _authToken = accessToken;
+
+                            // Check if volunteer already exists - if so, redirect to Welcome page
+                            var volunteerExists = await SupabaseService.VolunteerExistsAsync(accessToken);
+                            if (volunteerExists)
+                            {
+                                // Redirect to Welcome page with the auth token in the hash
+                                var welcomeUrl = $"{NavigationManager.BaseUri.TrimEnd('/')}/lmQvC2gla934vbWiZtduNisIaGCxpTS9#{urlHash.TrimStart('#')}";
+                                NavigationManager.NavigateTo(welcomeUrl, forceLoad: true);
+                                return;
+                            }
+
                             StateHasChanged();
                         }
                     }

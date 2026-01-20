@@ -13,4 +13,5 @@ public interface ISupabaseService
     Task<List<Interest>> GetOutreachSubCommitteeAsync(string? authToken = null);
     Task<List<Interest>> GetStandingCommitteeAsync(string? authToken = null);
     Task<List<Interest>> GetLanguagesAsync(string? authToken = null);
+    Task<bool> VolunteerExistsAsync(string authToken);
 }

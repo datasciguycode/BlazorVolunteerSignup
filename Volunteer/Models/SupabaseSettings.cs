@@ -8,4 +8,5 @@ public class SupabaseSettings
     public string EmailLinkUrl { get; set; } = string.Empty;
     public string UpdateInterestsUrl { get; set; } = string.Empty;
     public string UpdateVolunteerUrl { get; set; } = string.Empty;
+    public string CheckVolunteerUrl { get; set; } = string.Empty;
 }
