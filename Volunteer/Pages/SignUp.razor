@@ -125,6 +125,15 @@
     }
 </style>
 
+@if (_isCheckingVolunteer)
+{
+    <div style="height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+        <FluentProgressRing />
+        <div style="margin-top: 1rem;">Loading...</div>
+    </div>
+}
+else
+{
 <div class="page-container">
     <div class="page-header">
         <img src="images/logo.png" alt="MCDPTX Logo" />
@@ -132,15 +141,6 @@
     </div>
 
     <div class="page-content">
-        @if (_isCheckingVolunteer)
-        {
-            <div style="text-align: center; padding: 2rem;">
-                <FluentProgressRing />
-                <div style="margin-top: 1rem;">Loading...</div>
-            </div>
-        }
-        else
-        {
         @if (string.IsNullOrWhiteSpace(_authToken) && string.IsNullOrEmpty(_statusMessage))
         {
             <div class="message-bar-container">
@@ -217,9 +217,9 @@
                 <span>✨ Submit</span>
             }
         </button>
-        }
     </div>
 </div>
+}
 
 @code {
     private FluentTextField _firstNameField = default!;
