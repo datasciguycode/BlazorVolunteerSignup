@@ -125,14 +125,7 @@
     }
 </style>
 
-@if (_isCheckingVolunteer)
-{
-    <div style="height: 100vh; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-        <FluentProgressRing />
-        <div style="margin-top: 1rem;">Loading...</div>
-    </div>
-}
-else
+@if (!_isCheckingVolunteer)
 {
 <div class="page-container">
     <div class="page-header">
