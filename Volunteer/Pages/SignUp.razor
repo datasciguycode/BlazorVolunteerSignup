@@ -68,6 +68,10 @@
         --neutral-fill-input-hover: #d4e9ff;
         --neutral-fill-input-active: #e7f3ff;
         --neutral-fill-input-focus: #e7f3ff;
+        --neutral-fill-rest: #e7f3ff;
+        --neutral-fill-hover: #d4e9ff;
+        --neutral-fill-active: #e7f3ff;
+        --neutral-fill-focus: #e7f3ff;
     }
 
     .form-field fluent-text-field::part(root) {
@@ -81,6 +85,7 @@
 
     .form-field fluent-select::part(control) {
         font-size: 16px;
+        background-color: #e7f3ff !important;
     }
 
     .form-field fluent-select::part(listbox) {
@@ -524,22 +529,22 @@
                 _county = string.Empty;
                 _state = string.Empty;
                 _zip = string.Empty;
-                _phoneNumberTouched = false;
-            }
+            }   _phoneNumberTouched = false;
             else
-            {
+            {lse
                 _messageIntent = MessageIntent.Error;
                 _statusMessage = $"Failed to send your information. {errorMessage}";
-            }
-        }
+            }   _statusMessage = $"Failed to send your information. {errorMessage}";
+        }   }
         catch (Exception ex)
-        {
+        {atch (Exception ex)
             _messageIntent = MessageIntent.Error;
             _statusMessage = $"An error occurred: {ex.Message}";
-        }
+        }   _statusMessage = $"An error occurred: {ex.Message}";
         finally
-        {
+        {inally
             _isSubmitting = false;
-        }
-    }
+        }   _isSubmitting = false;
+    }   }
+}   }
 }
