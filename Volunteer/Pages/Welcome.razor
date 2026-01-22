@@ -344,11 +344,19 @@
                     <div class="form-field">
                         <FluentTextArea @bind-Value="_emergencyContact" Label="Emergency contact:"
                             Disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
-                            Rows="4" Style="width: 100%;" Maxlength="200
+                            Rows="4" Style="width: 100%;" Maxlength="200" />
+                    </div>
+                </div>
+                <button type="button" @onclick="@SubmitMessageAsync"
+                    disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
+                    class="submit-button">
+                    @if (_isSubmitting)
+                    {
+                        <span>Submitting...</span>
                     }
                     else
                     {
-                        <span>✨ Submit</span>
+                        <span>Submit</span>
                     }
                 </button>
                 </div>
