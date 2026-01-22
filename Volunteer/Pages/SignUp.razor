@@ -59,11 +59,15 @@
         width: 100%;
     }
 
-    .form-field fluent-text-field {
+    .form-field fluent-text-field,
+    .form-field fluent-select {
         width: 100% !important;
         display: block !important;
-        --textfield-filled-background-rest: transparent;
         font-size: 16px;
+        --neutral-fill-input-rest: #e7f3ff;
+        --neutral-fill-input-hover: #d4e9ff;
+        --neutral-fill-input-active: #e7f3ff;
+        --neutral-fill-input-focus: #e7f3ff;
     }
 
     .form-field fluent-text-field::part(root) {
