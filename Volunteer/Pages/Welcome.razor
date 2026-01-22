@@ -339,20 +339,12 @@
                     <div class="form-field">
                         <FluentTextArea @bind-Value="_aboutMyself" Label="Tell us about yourself:"
                             Disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
-                            Rows="6" Style="width: 100%;" Maxlength="100" Id="aboutMyselfTextArea" />
+                            Rows="6" Style="width: 100%;" Maxlength="500" Id="aboutMyselfTextArea" />
                     </div>
                     <div class="form-field">
-                        <FluentTextArea @bind-Value="_emergencyContact" Label="Emergency Contact"
+                        <FluentTextArea @bind-Value="_emergencyContact" Label="Emergency contact:"
                             Disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
-                            Rows="4" Style="width: 100%;" Maxlength="100" />
-                    </div>
-                </div>
-                <button type="button" @onclick="@SubmitMessageAsync"
-                    disabled="@(_isSubmitting || _isSubmitted || string.IsNullOrWhiteSpace(_authToken))"
-                    class="submit-button">
-                    @if (_isSubmitting)
-                    {
-                        <span>📧 Sending...</span>
+                            Rows="4" Style="width: 100%;" Maxlength="200
                     }
                     else
                     {

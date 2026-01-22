@@ -40,6 +40,11 @@ public class SupabaseService : ISupabaseService
                 first_name = message.FirstName,
                 last_name = message.LastName,
                 phone_number = message.PhoneNumber,
+                address_1 = message.Address1,
+                address_2 = message.Address2,
+                city = message.City,
+                county = message.County,
+                state = message.State,
                 zip = message.Zip,
                 body = message.Body
             };

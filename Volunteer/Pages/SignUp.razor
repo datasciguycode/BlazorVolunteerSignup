@@ -183,6 +183,37 @@
         </div>
 
         <div class="form-field">
+            <FluentTextField @ref="_address1Field" @bind-Value="_address1" Label="Address 1"
+                Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))" Style="width: 100%;" />
+        </div>
+
+        <div class="form-field">
+            <FluentTextField @ref="_address2Field" @bind-Value="_address2" Label="Address 2"
+                Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))" Style="width: 100%;" />
+        </div>
+
+        <div class="form-field">
+            <FluentTextField @ref="_cityField" @bind-Value="_city" Label="City"
+                Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))" Style="width: 100%;" />
+        </div>
+
+        <div class="form-field">
+            <FluentTextField @ref="_countyField" @bind-Value="_county" Label="County"
+                Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))" Style="width: 100%;" />
+        </div>
+
+        <div class="form-field">
+            <FluentSelect TOption="string" @bind-Value="_state" Label="State" Required="true"
+                Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))" Style="width: 100%;">
+                <FluentOption TOption="string" Value="">Select a state...</FluentOption>
+                @foreach (var state in _usStates)
+                {
+                    <FluentOption TOption="string" Value="@state.Key">@state.Value</FluentOption>
+                }
+            </FluentSelect>
+        </div>
+
+        <div class="form-field">
             <FluentTextField @ref="_zipField" @bind-Value="_zip" @oninput="FormatZip" Label="Zip Code"
                 Placeholder="12345" Required="true" Disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_authToken))"
                 TextFieldType="TextFieldType.Text" Maxlength="5" Style="width: 100%;" />
@@ -199,7 +230,7 @@
         </div>
 
         <button type="button" @onclick="@SubmitMessageAsync"
-            disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName) || string.IsNullOrWhiteSpace(_email) || !IsValidEmail(_email) || string.IsNullOrWhiteSpace(_phoneNumber) || !IsValidPhoneNumber(_phoneNumber) || string.IsNullOrWhiteSpace(_zip) || !IsValidZip(_zip) || string.IsNullOrWhiteSpace(_authToken))"
+            disabled="@(_isSubmitting || string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName) || string.IsNullOrWhiteSpace(_email) || !IsValidEmail(_email) || string.IsNullOrWhiteSpace(_phoneNumber) || !IsValidPhoneNumber(_phoneNumber) || string.IsNullOrWhiteSpace(_address1) || string.IsNullOrWhiteSpace(_city) || string.IsNullOrWhiteSpace(_county) || string.IsNullOrWhiteSpace(_state) || string.IsNullOrWhiteSpace(_zip) || !IsValidZip(_zip) || string.IsNullOrWhiteSpace(_authToken))"
             class="submit-button">
             @if (_isSubmitting)
             {
@@ -219,11 +250,20 @@
     private FluentTextField _lastNameField = default!;
     private FluentTextField _emailField = default!;
     private FluentTextField _phoneNumberField = default!;
+    private FluentTextField _address1Field = default!;
+    private FluentTextField _address2Field = default!;
+    private FluentTextField _cityField = default!;
+    private FluentTextField _countyField = default!;
     private FluentTextField _zipField = default!;
     private string _firstName = string.Empty;
     private string _lastName = string.Empty;
     private string _email = string.Empty;
     private string _phoneNumber = string.Empty;
+    private string _address1 = string.Empty;
+    private string _address2 = string.Empty;
+    private string _city = string.Empty;
+    private string _county = string.Empty;
+    private string _state = "TX";
     private string _zip = string.Empty;
     private string _website = string.Empty; // Honeypot field
     private string _authToken = string.Empty;
@@ -232,6 +272,23 @@
     private string _statusMessage = string.Empty;
     private MessageIntent _messageIntent = MessageIntent.Success;
     private bool _phoneNumberTouched = false;
+
+    private static readonly Dictionary<string, string> _usStates = new()
+    {
+        { "AL", "Alabama" }, { "AK", "Alaska" }, { "AZ", "Arizona" }, { "AR", "Arkansas" },
+        { "CA", "California" }, { "CO", "Colorado" }, { "CT", "Connecticut" }, { "DE", "Delaware" },
+        { "FL", "Florida" }, { "GA", "Georgia" }, { "HI", "Hawaii" }, { "ID", "Idaho" },
+        { "IL", "Illinois" }, { "IN", "Indiana" }, { "IA", "Iowa" }, { "KS", "Kansas" },
+        { "KY", "Kentucky" }, { "LA", "Louisiana" }, { "ME", "Maine" }, { "MD", "Maryland" },
+        { "MA", "Massachusetts" }, { "MI", "Michigan" }, { "MN", "Minnesota" }, { "MS", "Mississippi" },
+        { "MO", "Missouri" }, { "MT", "Montana" }, { "NE", "Nebraska" }, { "NV", "Nevada" },
+        { "NH", "New Hampshire" }, { "NJ", "New Jersey" }, { "NM", "New Mexico" }, { "NY", "New York" },
+        { "NC", "North Carolina" }, { "ND", "North Dakota" }, { "OH", "Ohio" }, { "OK", "Oklahoma" },
+        { "OR", "Oregon" }, { "PA", "Pennsylvania" }, { "RI", "Rhode Island" }, { "SC", "South Carolina" },
+        { "SD", "South Dakota" }, { "TN", "Tennessee" }, { "TX", "Texas" }, { "UT", "Utah" },
+        { "VT", "Vermont" }, { "VA", "Virginia" }, { "WA", "Washington" }, { "WV", "West Virginia" },
+        { "WI", "Wisconsin" }, { "WY", "Wyoming" }, { "DC", "District of Columbia" }
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -384,7 +441,8 @@
     {
         if (string.IsNullOrWhiteSpace(_firstName) || string.IsNullOrWhiteSpace(_lastName) || string.IsNullOrWhiteSpace(_email)
         || !IsValidEmail(_email) || string.IsNullOrWhiteSpace(_phoneNumber) || !IsValidPhoneNumber(_phoneNumber)
-        || string.IsNullOrWhiteSpace(_zip) || !IsValidZip(_zip) || string.IsNullOrWhiteSpace(_authToken))
+        || string.IsNullOrWhiteSpace(_address1) || string.IsNullOrWhiteSpace(_city) || string.IsNullOrWhiteSpace(_county)
+        || string.IsNullOrWhiteSpace(_state) || string.IsNullOrWhiteSpace(_zip) || !IsValidZip(_zip) || string.IsNullOrWhiteSpace(_authToken))
         {
             return;
         }
@@ -399,6 +457,11 @@
             _lastName = string.Empty;
             _email = string.Empty;
             _phoneNumber = string.Empty;
+            _address1 = string.Empty;
+            _address2 = string.Empty;
+            _city = string.Empty;
+            _county = string.Empty;
+            _state = string.Empty;
             _zip = string.Empty;
             _website = string.Empty;
             _phoneNumberTouched = false;
@@ -416,6 +479,11 @@
                 LastName = _lastName.Trim(),
                 Email = _email.Trim(),
                 PhoneNumber = _phoneNumber.Trim(),
+                Address1 = _address1.Trim(),
+                Address2 = _address2.Trim(),
+                City = _city.Trim(),
+                County = _county.Trim(),
+                State = _state.Trim(),
                 Zip = _zip.Trim(),
                 Body = _firstName.Trim()
             };
@@ -430,6 +498,11 @@
                 _lastName = string.Empty;
                 _email = string.Empty;
                 _phoneNumber = string.Empty;
+                _address1 = string.Empty;
+                _address2 = string.Empty;
+                _city = string.Empty;
+                _county = string.Empty;
+                _state = string.Empty;
                 _zip = string.Empty;
                 _phoneNumberTouched = false;
             }
