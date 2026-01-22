@@ -529,22 +529,22 @@
                 _county = string.Empty;
                 _state = string.Empty;
                 _zip = string.Empty;
-            }   _phoneNumberTouched = false;
+                _phoneNumberTouched = false;
+            }
             else
-            {lse
+            {
                 _messageIntent = MessageIntent.Error;
                 _statusMessage = $"Failed to send your information. {errorMessage}";
-            }   _statusMessage = $"Failed to send your information. {errorMessage}";
-        }   }
+            }
+        }
         catch (Exception ex)
-        {atch (Exception ex)
+        {
             _messageIntent = MessageIntent.Error;
             _statusMessage = $"An error occurred: {ex.Message}";
-        }   _statusMessage = $"An error occurred: {ex.Message}";
+        }
         finally
-        {inally
+        {
             _isSubmitting = false;
-        }   _isSubmitting = false;
-    }   }
-}   }
+        }
+    }
 }
